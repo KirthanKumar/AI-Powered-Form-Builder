@@ -120,4 +120,13 @@ class SchemaController extends Controller
             )
         );
     }
+
+    public function schema(Request $request, Form $form): FormVersionResource
+    {
+        Gate::authorize('view', $form);
+
+        return new FormVersionResource(
+            $form->currentVersion()->firstOrFail()
+        );
+    }
 }

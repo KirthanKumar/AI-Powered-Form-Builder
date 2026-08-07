@@ -12,7 +12,13 @@ class FormController extends Controller
 {
     public function __construct(
         protected FormService $formService
-    ) {
+    ) {}
+
+    public function index(Request $request)
+    {
+        $forms = $request->user()->forms()->latest()->paginate(10);
+
+        return FormResource::collection($forms);
     }
 
     public function store(StoreFormRequest $request): FormResource
