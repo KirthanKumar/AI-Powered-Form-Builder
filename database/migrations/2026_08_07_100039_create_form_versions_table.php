@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
             $table->unique(['form_id', 'version_number']);
+            $table->index('schema_hash');
         });
     }
 

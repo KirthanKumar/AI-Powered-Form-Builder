@@ -13,7 +13,14 @@ return new class extends Migration
     {
         Schema::create('submissions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('form_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('form_version_id')->constrained()->cascadeOnDelete();
+            $table->json('submission_json');
+            $table->string('submitted_email')->nullable();
+            $table->ipAddress('ip_address')->nullable();
+            $table->string('user_agent')->nullable();
             $table->timestamps();
+            $table->index('form_id');
         });
     }
 

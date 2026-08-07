@@ -13,6 +13,8 @@ class FormVersion extends Model
 {
     use HasFactory;
 
+    public const INITIAL_VERSION = 1;
+
     protected $fillable = [
         'form_id',
         'version_number',

@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::table('forms', function (Blueprint $table) {
             $table->foreign('current_version_id')->references('id')->on('form_versions')->nullOnDelete();
-            $table->foreign('published_version_id')->references('id')->on('form_versions')->nullOnDelete();
         });
     }
 
@@ -24,7 +23,6 @@ return new class extends Migration
     {
         Schema::table('forms', function (Blueprint $table) {
             $table->dropForeign(['current_version_id']);
-            $table->dropForeign(['published_version_id']);
         });
     }
 };

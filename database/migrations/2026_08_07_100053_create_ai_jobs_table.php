@@ -13,7 +13,18 @@ return new class extends Migration
     {
         Schema::create('ai_jobs', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('form_id')->nullable()->constrained()->nullOnDelete();
+            $table->enum('type', ['generate','edit','translate']);
+            $table->text('prompt');
+            $table->json('response_json')->nullable();
+            $table->string('model');
+            $table->integer('input_tokens')->nullable();
+            $table->integer('output_tokens')->nullable();
+            $table->integer('latency_ms')->nullable();
+            $table->enum('status', ['pending','processing','completed','failed']);
+            $table->text('error')->nullable();
             $table->timestamps();
+            $table->index('status');
         });
     }
 

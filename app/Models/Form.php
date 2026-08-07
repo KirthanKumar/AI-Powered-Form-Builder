@@ -17,6 +17,10 @@ class Form extends Model
     use SoftDeletes;
     use HasFactory;
 
+    public const STATUS_DRAFT = 'draft';
+    public const STATUS_PUBLISHED = 'published';
+    public const STATUS_ARCHIVED = 'archived';
+
     protected $fillable = [
         'uuid',
         'user_id',
