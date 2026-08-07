@@ -19,6 +19,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/forms/{form}/sections', [SchemaController::class, 'addSection']);
+    Route::patch('/forms/{form}/sections/{sectionId}', [SchemaController::class, 'renameSection']);
+    Route::delete('/forms/{form}/sections/{sectionId}', [SchemaController::class, 'deleteSection']);
     Route::post('/forms/{form}/sections/{sectionId}/fields', [SchemaController::class, 'addField']);
     Route::patch('/forms/{form}/fields/{fieldId}', [SchemaController::class, 'updateField']);
+    Route::delete('/forms/{form}/fields/{fieldId}', [SchemaController::class, 'deleteField']);
+    Route::post('/forms/{form}/fields/{fieldId}/duplicate', [SchemaController::class, 'duplicateField']);
+    Route::patch('/forms/{form}/sections/{sectionId}/fields/move', [SchemaController::class, 'moveField']);
 });

@@ -15,7 +15,8 @@ class MoveFieldRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'from' => ['required', 'integer', 'min:0'],
+            'to' => ['required', 'integer', 'min:0'],
         ];
     }
 }
