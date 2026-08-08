@@ -1,16 +1,339 @@
-import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+
+import api from '../api/client';
+import FormCanvas from '../components/builder/FormCanvas';
+import FieldPalette from '../components/builder/FieldPalette';
+import FieldSettings from '../components/builder/FieldSettings';
 
 export default function FormBuilderPage() {
 
     const { formId } = useParams();
 
-    return (
-        <div className="container py-5">
-            <h1>Form Builder</h1>
+    const [schema, setSchema] = useState(null);
+    const [version, setVersion] = useState(null);
 
-            <p className="text-muted">
-                Editing form: {formId}
-            </p>
+    const [selectedFieldId, setSelectedFieldId] = useState(null);
+    const [selectedSectionId, setSelectedSectionId] = useState(null);
+
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    async function handleDeleteField(fieldId) {
+        if (!fieldId) {
+            return;
+        }
+
+        const confirmed = window.confirm(
+            'Are you sure you want to delete this field?'
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            const response = await api.delete(
+                `/forms/${formId}/fields/${fieldId}`
+            );
+
+            setSchema(response.data.data.schema);
+            setVersion(response.data.data.version_number);
+
+            setSelectedFieldId(null);
+
+        } catch (error) {
+            console.error(error);
+
+            setError(
+                error.response?.data?.message ??
+                'Unable to delete field.'
+            );
+        }
+    }
+
+    async function handleUpdateField(attributes) {
+        if (!selectedFieldId) {
+            return;
+        }
+
+        try {
+            const response = await api.patch(
+                `/forms/${formId}/fields/${selectedFieldId}`,
+                attributes
+            );
+
+            setSchema(response.data.data.schema);
+            setVersion(response.data.data.version_number);
+
+        } catch (error) {
+            console.error(error);
+
+            setError(
+                error.response?.data?.message ??
+                'Unable to update field.'
+            );
+        }
+    }
+
+    function findField(fieldId) {
+        if (!schema || !fieldId) {
+            return null;
+        }
+
+        for (const section of schema.sections) {
+            const field = section.fields.find(
+                (field) => field.id === fieldId
+            );
+
+            if (field) {
+                return field;
+            }
+        }
+
+        return null;
+    }
+
+    function getDefaultLabel(type) {
+        const labels = {
+            text: 'Text Field',
+            textarea: 'Text Area',
+            number: 'Number',
+            email: 'Email',
+            phone: 'Phone',
+            date: 'Date',
+            dropdown: 'Dropdown',
+            radio: 'Radio',
+            checkbox: 'Checkbox',
+            file: 'File Upload',
+            rating: 'Rating',
+        };
+
+        return labels[type] ?? 'New Field';
+    }
+
+    async function handleAddField(type) {
+        if (!selectedSectionId) {
+            return;
+        }
+
+        try {
+            const response = await api.post(
+                `/forms/${formId}/sections/${selectedSectionId}/fields`,
+                {
+                    type,
+                    label: getDefaultLabel(type),
+                }
+            );
+
+            setSchema(response.data.data.schema);
+            setVersion(response.data.data.version_number);
+
+        } catch (error) {
+            console.error(error);
+
+            setError(
+                error.response?.data?.message ??
+                'Unable to add field.'
+            );
+        }
+    }
+
+    async function loadSchema() {
+
+        setLoading(true);
+        setError('');
+
+        try {
+
+            const response = await api.get(
+                `/forms/${formId}/schema`
+            );
+
+            setSchema(response.data.data.schema);
+            setVersion(response.data.data.version_number);
+
+        } catch (error) {
+
+            if (error.response?.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+
+            setError(
+                error.response?.data?.message ??
+                'Unable to load form schema.'
+            );
+
+        } finally {
+
+            setLoading(false);
+
+        }
+    }
+
+    useEffect(() => {
+        loadSchema();
+    }, [formId]);
+
+    function handleSelectField(fieldId) {
+        setSelectedFieldId(fieldId);
+    }
+    const selectedField = findField(selectedFieldId);
+
+    return (
+        <div className="min-vh-100 bg-light">
+
+            <nav className="navbar bg-white border-bottom">
+
+                <div className="container-fluid px-4">
+
+                    <div className="d-flex align-items-center gap-3">
+
+                        <Link
+                            to="/dashboard"
+                            className="btn btn-outline-secondary"
+                        >
+                            ← Forms
+                        </Link>
+
+                        <div>
+                            <div className="fw-semibold">
+                                Form Builder
+                            </div>
+
+                            {version && (
+                                <div className="small text-muted">
+                                    Version {version}
+                                </div>
+                            )}
+                        </div>
+
+                    </div>
+
+                    <div className="d-flex gap-2">
+
+                        <Link
+                            to={`/forms/${formId}/preview`}
+                            className="btn btn-outline-secondary"
+                        >
+                            Preview
+                        </Link>
+
+                        <button
+                            className="btn btn-primary"
+                            disabled
+                        >
+                            Save
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </nav>
+
+            <div className="container-fluid">
+
+                {loading && (
+                    <div className="text-center py-5">
+
+                        <div
+                            className="spinner-border"
+                            role="status"
+                        />
+
+                        <div className="mt-2 text-muted">
+                            Loading form...
+                        </div>
+
+                    </div>
+                )}
+
+                {!loading && error && (
+                    <div className="container py-4">
+
+                        <div className="alert alert-danger">
+                            {error}
+                        </div>
+
+                    </div>
+                )}
+
+                {!loading && !error && schema && (
+
+                    <div className="row g-0">
+
+                        {/* Field palette */}
+
+                        <aside
+                            className="col-md-3 col-lg-2 bg-white border-end"
+                            style={{ minHeight: 'calc(100vh - 57px)' }}
+                        >
+                            <div className="p-3">
+
+                                <FieldPalette
+                                    selectedSectionId={selectedSectionId}
+                                    onAddField={handleAddField}
+                                    disabled={loading}
+                                />
+
+                            </div>
+                        </aside>
+
+                        {/* Canvas */}
+
+                        <main
+                            className="col-md-6 col-lg-7"
+                            style={{
+                                minHeight: 'calc(100vh - 57px)'
+                            }}
+                        >
+
+                            <div className="p-4">
+
+                                <FormCanvas
+                                    schema={schema}
+                                    selectedFieldId={selectedFieldId}
+                                    selectedSectionId={selectedSectionId}
+                                    onSelectField={handleSelectField}
+                                    onSelectSection={setSelectedSectionId}
+                                />
+
+                            </div>
+
+                        </main>
+
+                        {/* Settings */}
+
+                        <aside
+                            className="col-md-3 col-lg-3 bg-white border-start"
+                            style={{
+                                minHeight: 'calc(100vh - 57px)'
+                            }}
+                        >
+                            <div className="p-4">
+
+                                <h5 className="mb-4">
+                                    Field settings
+                                </h5>
+
+                                <FieldSettings
+                                    field={selectedField}
+                                    onUpdate={handleUpdateField}
+                                    onDelete={handleDeleteField}
+                                    disabled={loading}
+                                />
+
+                            </div>
+                        </aside>
+
+                    </div>
+
+                )}
+
+            </div>
+
         </div>
     );
 }

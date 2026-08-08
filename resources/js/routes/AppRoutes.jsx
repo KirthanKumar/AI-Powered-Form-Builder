@@ -5,6 +5,7 @@ import RegisterPage from '../pages/RegisterPage';
 import DashboardPage from '../pages/DashboardPage';
 import FormBuilderPage from '../pages/FormBuilderPage';
 import SubmissionsPage from '../pages/SubmissionsPage';
+import FormPreviewPage from '../pages/FormPreviewPage';
 
 function ProtectedRoute({ children }) {
     const token = localStorage.getItem('auth_token');
@@ -66,6 +67,11 @@ export default function AppRoutes() {
                 <Route
                     path="*"
                     element={<Navigate to="/dashboard" replace />}
+                />
+
+                <Route
+                    path="/forms/:formId/preview"
+                    element={<FormPreviewPage />}
                 />
 
             </Routes>
