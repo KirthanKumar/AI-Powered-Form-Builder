@@ -1,9 +1,10 @@
 FROM php:8.3-fpm
 
-# Install system dependencies and PHP extensions
+# Install system dependencies + Node.js
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
+    curl \
     libzip-dev \
     libpng-dev \
     libjpeg62-turbo-dev \
@@ -12,6 +13,8 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libicu-dev \
     libpq-dev \
+    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y nodejs \
     && docker-php-ext-configure gd \
         --with-freetype \
         --with-jpeg \
@@ -42,10 +45,12 @@ RUN composer install \
     --no-interaction \
     --prefer-dist
 
+# Install frontend dependencies and build Vite assets
+RUN npm ci
+RUN npm run build
+
 # Laravel permissions
-RUN chown -R www-data:www-data \
-    storage \
-    bootstrap/cache
+RUN chown -R www-data:www-data storage bootstrap/cache
 
 # Laravel production configuration
 RUN php artisan config:clear \
