@@ -35,3 +35,4 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::get('/public/forms/{uuid}', [PublicFormController::class, 'show']);
+Route::post('/public/forms/{uuid}/submissions', [PublicFormController::class, 'submit',]);

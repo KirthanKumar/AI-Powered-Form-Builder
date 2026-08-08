@@ -58,4 +58,9 @@ class Form extends Model
     {
         return $this->belongsTo(FormVersion::class, 'current_version_id');
     }
+
+    public function submissions(): HasMany
+    {
+        return $this->hasMany(Submission::class);
+    }
 }
