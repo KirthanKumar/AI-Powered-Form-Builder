@@ -11,11 +11,10 @@ export default function FormCard({ form }) {
                     </h5>
 
                     <span
-                        className={`badge ${
-                            form.status === 'published'
-                                ? 'text-bg-success'
-                                : 'text-bg-secondary'
-                        }`}
+                        className={`badge ${form.status === 'published'
+                            ? 'text-bg-success'
+                            : 'text-bg-secondary'
+                            }`}
                     >
                         {form.status}
                     </span>
@@ -29,12 +28,18 @@ export default function FormCard({ form }) {
                     Version {form.current_version?.version_number ?? 1}
                 </div>
 
-                <div className="mt-auto">
+                <div className="mt-auto d-flex gap-2">
                     <Link
                         to={`/forms/${form.id}/builder`}
                         className="btn btn-primary"
                     >
                         Edit form
+                    </Link>
+                    <Link
+                        to={`/forms/${form.id}/submissions`}
+                        className="btn btn-sm btn-outline-primary"
+                    >
+                        Submissions
                     </Link>
                 </div>
 

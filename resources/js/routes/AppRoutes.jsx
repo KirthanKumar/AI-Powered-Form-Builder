@@ -7,6 +7,7 @@ import FormBuilderPage from '../pages/FormBuilderPage';
 import SubmissionsPage from '../pages/SubmissionsPage';
 import FormPreviewPage from '../pages/FormPreviewPage';
 import PublicFormPage from '../pages/PublicFormPage';
+import SubmissionDetailPage from '../pages/SubmissionDetailPage';
 
 function ProtectedRoute({ children }) {
     const token = localStorage.getItem('auth_token');
@@ -56,6 +57,15 @@ export default function AppRoutes() {
                     element={
                         <ProtectedRoute>
                             <SubmissionsPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/forms/:formId/submissions/:submissionId"
+                    element={
+                        <ProtectedRoute>
+                            <SubmissionDetailPage />
                         </ProtectedRoute>
                     }
                 />
