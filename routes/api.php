@@ -22,6 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/forms/{form}/publish', [FormController::class, 'publish']);
     Route::post('/forms/{form}/unpublish', [FormController::class, 'unpublish']);
 
+    Route::get('/forms/{form}/submissions/export', [SubmissionController::class, 'export']);
     Route::get('/forms/{form}/submissions', [SubmissionController::class, 'index']);
     Route::get('/forms/{form}/submissions/{submission}', [SubmissionController::class, 'show']);
 });

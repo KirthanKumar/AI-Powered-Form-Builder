@@ -54,4 +54,50 @@ class SubmissionController extends Controller
 
         return new SubmissionResource($submission);
     }
+
+    public function export(Request $request, Form $form)
+    {
+        abort_unless(
+            $form->user_id === $request->user()->id,
+            403
+        );
+
+        $submissions = $form
+            ->submissions()
+            ->with('formVersion')
+            ->latest()
+            ->get();
+
+        $filename = sprintf(
+            '%s-submissions-%s.csv',
+            str($form->title)->slug(),
+            now()->format('Y-m-d')
+        );
+
+        return response()->streamDownload(function () use ($submissions) {
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, [
+                'ID',
+                'Submitted At',
+                'Email',
+                'Version',
+                'Submission',
+            ]);
+
+            foreach ($submissions as $submission) {
+                fputcsv($handle, [
+                    $submission->id,
+                    $submission->submitted_at,
+                    $submission->submitted_email,
+                    $submission->formVersion?->version_number,
+                    json_encode($submission->submission),
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv',
+        ]);
+    }
 }

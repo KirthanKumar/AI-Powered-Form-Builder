@@ -13,6 +13,42 @@ export default function SubmissionsPage() {
     const [error, setError] = useState('');
     const [search, setSearch] = useState('');
 
+    async function handleExport() {
+        try {
+            const response = await api.get(
+                `/forms/${formId}/submissions/export`,
+                {
+                    responseType: 'blob',
+                }
+            );
+
+            const url = window.URL.createObjectURL(
+                new Blob([response.data], {
+                    type: 'text/csv',
+                })
+            );
+
+            const link = document.createElement('a');
+
+            link.href = url;
+            link.download = `form-${formId}-submissions.csv`;
+
+            document.body.appendChild(link);
+            link.click();
+
+            link.remove();
+            window.URL.revokeObjectURL(url);
+
+        } catch (error) {
+            console.error(error);
+
+            setError(
+                error.response?.data?.message ??
+                'Unable to export submissions.'
+            );
+        }
+    }
+
     async function loadSubmissions(page = 1, searchTerm = search) {
         setLoading(true);
         setError('');
@@ -116,11 +152,17 @@ export default function SubmissionsPage() {
 
                                     <div className="small text-muted">
                                         {pagination?.total ?? submissions.length} submission
-                                        {(pagination?.total ?? submissions.length) !== 1
-                                            ? 's'
-                                            : ''}
+                                        {(pagination?.total ?? submissions.length) !== 1 ? 's' : ''}
                                     </div>
                                 </div>
+
+                                <button
+                                    type="button"
+                                    className="btn btn-sm btn-outline-success"
+                                    onClick={handleExport}
+                                >
+                                    Export CSV
+                                </button>
 
                                 <form
                                     className="d-flex gap-2"
