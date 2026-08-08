@@ -22,6 +22,58 @@ export default function FormBuilderPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
+    const [aiPrompt, setAiPrompt] = useState('');
+    const [aiLoading, setAiLoading] = useState(false);
+    const [aiError, setAiError] = useState('');
+
+    async function handleAiEdit() {
+        if (!aiPrompt.trim()) {
+            return;
+        }
+
+        setAiLoading(true);
+        setAiError('');
+        setError('');
+
+        try {
+            const response = await api.post(
+                `/forms/${formId}/ai/edit`,
+                {
+                    prompt: aiPrompt.trim(),
+                }
+            );
+
+            console.log('AI FULL RESPONSE:', response.data);
+
+            const updatedForm = response.data.data.form;
+            const updatedVersion = response.data.data.version;
+
+            console.log(
+                'AI UPDATED SCHEMA:',
+                updatedVersion.schema_json
+            );
+
+            setSchema(updatedVersion.schema_json);
+            setVersion(updatedVersion.version_number);
+            setForm(updatedForm);
+
+            setSelectedFieldId(null);
+            setSelectedSectionId(null);
+
+            setAiPrompt('');
+
+        } catch (error) {
+            console.error('AI edit failed:', error);
+
+            setAiError(
+                error.response?.data?.message ??
+                'Unable to update form with AI.'
+            );
+        } finally {
+            setAiLoading(false);
+        }
+    }
+
     async function handlePublish() {
         try {
             const response = await api.post(
@@ -566,8 +618,57 @@ export default function FormBuilderPage() {
                                     field={selectedField}
                                     onUpdate={handleUpdateField}
                                     onDelete={handleDeleteField}
-                                    disabled={loading}
+                                    disabled={loading || aiLoading}
                                 />
+
+                                <hr className="my-4" />
+
+                                <h5 className="mb-3">
+                                    AI Assistant
+                                </h5>
+
+                                <p className="small text-muted">
+                                    Describe a change you want to make to this form.
+                                </p>
+
+                                <textarea
+                                    className="form-control mb-2"
+                                    rows="5"
+                                    placeholder="e.g. Add an emergency contact section"
+                                    value={aiPrompt}
+                                    onChange={(event) =>
+                                        setAiPrompt(event.target.value)
+                                    }
+                                    disabled={aiLoading}
+                                />
+
+                                {aiError && (
+                                    <div className="alert alert-danger small">
+                                        {aiError}
+                                    </div>
+                                )}
+
+                                <button
+                                    type="button"
+                                    className="btn btn-primary w-100"
+                                    onClick={handleAiEdit}
+                                    disabled={
+                                        aiLoading ||
+                                        !aiPrompt.trim()
+                                    }
+                                >
+                                    {aiLoading ? (
+                                        <>
+                                            <span
+                                                className="spinner-border spinner-border-sm me-2"
+                                                role="status"
+                                            />
+                                            Updating form...
+                                        </>
+                                    ) : (
+                                        'Apply with AI'
+                                    )}
+                                </button>
 
                             </div>
                         </aside>

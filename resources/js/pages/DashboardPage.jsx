@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import api from '../api/client';
 
@@ -58,6 +59,13 @@ export default function DashboardPage() {
             <nav className="navbar navbar-expand-lg bg-body-tertiary border-bottom">
 
                 <div className="container">
+
+                    <Link
+                        to="/ai/forms/generate"
+                        className="btn btn-outline-primary"
+                    >
+                        Generate with AI
+                    </Link>
 
                     <a
                         className="navbar-brand fw-semibold"

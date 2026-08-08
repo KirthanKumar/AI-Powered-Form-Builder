@@ -8,6 +8,7 @@ import SubmissionsPage from '../pages/SubmissionsPage';
 import FormPreviewPage from '../pages/FormPreviewPage';
 import PublicFormPage from '../pages/PublicFormPage';
 import SubmissionDetailPage from '../pages/SubmissionDetailPage';
+import AiFormGeneratorPage from '../pages/AiFormGeneratorPage';
 
 function ProtectedRoute({ children }) {
     const token = localStorage.getItem('auth_token');
@@ -88,6 +89,11 @@ export default function AppRoutes() {
                 <Route
                     path="/public/forms/:uuid"
                     element={<PublicFormPage />}
+                />
+
+                <Route
+                    path="/ai/forms/generate"
+                    element={<AiFormGeneratorPage />}
                 />
 
             </Routes>

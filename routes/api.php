@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\SchemaController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PublicFormController;
 use App\Http\Controllers\Api\SubmissionController;
+use App\Http\Controllers\Api\AiFormController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -25,6 +26,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/forms/{form}/submissions/export', [SubmissionController::class, 'export']);
     Route::get('/forms/{form}/submissions', [SubmissionController::class, 'index']);
     Route::get('/forms/{form}/submissions/{submission}', [SubmissionController::class, 'show']);
+
+    Route::post('/ai/forms/generate', [AiFormController::class, 'generate']);
+    Route::post('/forms/{form}/ai/edit', [AiFormController::class, 'edit']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {
