@@ -9,13 +9,13 @@ class SchemaValidator
 {
     public function validate(array $schema): void
     {
-        if (! isset($schema['schema_version'])) {
-            throw new InvalidArgumentException('Schema version is missing.');
-        }
+        // if (! isset($schema['schema_version'])) {
+        //     throw new InvalidArgumentException('Schema version is missing.');
+        // }
 
-        if (! is_int($schema['schema_version'])) {
-            throw new InvalidArgumentException('Schema version must be an integer.');
-        }
+        // if (! is_int($schema['schema_version'])) {
+        //     throw new InvalidArgumentException('Schema version must be an integer.');
+        // }
 
         if (! isset($schema['sections'])) {
             throw new InvalidArgumentException('Schema sections are missing.');
