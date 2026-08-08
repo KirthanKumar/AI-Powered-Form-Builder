@@ -20,6 +20,13 @@ class FormVersionResource extends JsonResource
             'schema' => $this->schema_json,
             'created_by' => $this->created_by,
             'created_at' => $this->created_at,
+            'form' => [
+                'id' => $this->form->id,
+                'uuid' => $this->form->uuid,
+                'title' => $this->form->title,
+                'status' => $this->form->status,
+                'published_at' => $this->form->published_at,
+            ],
         ];
     }
 }

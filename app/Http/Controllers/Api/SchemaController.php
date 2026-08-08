@@ -126,7 +126,7 @@ class SchemaController extends Controller
         Gate::authorize('view', $form);
 
         return new FormVersionResource(
-            $form->currentVersion()->firstOrFail()
+            $form->currentVersion()->with('form')->firstOrFail()
         );
     }
 }

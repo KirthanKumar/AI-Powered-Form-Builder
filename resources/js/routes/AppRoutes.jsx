@@ -6,6 +6,7 @@ import DashboardPage from '../pages/DashboardPage';
 import FormBuilderPage from '../pages/FormBuilderPage';
 import SubmissionsPage from '../pages/SubmissionsPage';
 import FormPreviewPage from '../pages/FormPreviewPage';
+import PublicFormPage from '../pages/PublicFormPage';
 
 function ProtectedRoute({ children }) {
     const token = localStorage.getItem('auth_token');
@@ -72,6 +73,11 @@ export default function AppRoutes() {
                 <Route
                     path="/forms/:formId/preview"
                     element={<FormPreviewPage />}
+                />
+
+                <Route
+                    path="/public/forms/:uuid"
+                    element={<PublicFormPage />}
                 />
 
             </Routes>

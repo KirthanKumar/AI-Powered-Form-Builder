@@ -17,6 +17,7 @@ export default function FormBuilderPage() {
 
     const [selectedFieldId, setSelectedFieldId] = useState(null);
     const [selectedSectionId, setSelectedSectionId] = useState(null);
+    const publicUrl = form ? `${window.location.origin}/public/forms/${form.uuid}` : '';
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -345,6 +346,7 @@ export default function FormBuilderPage() {
 
             setSchema(response.data.data.schema);
             setVersion(response.data.data.version_number);
+            setForm(response.data.data.form);
 
         } catch (error) {
 
@@ -416,14 +418,38 @@ export default function FormBuilderPage() {
                         </Link>
 
                         {form?.status === 'published' ? (
-                            <button
-                                type="button"
-                                className="btn btn-outline-danger"
-                                disabled={loading}
-                                onClick={handleUnpublish}
-                            >
-                                Unpublish
-                            </button>
+                            <div className="d-flex align-items-center gap-2">
+                                <span className="badge text-bg-success">
+                                    Published
+                                </span>
+
+                                <button
+                                    type="button"
+                                    className="btn btn-sm btn-outline-secondary"
+                                    onClick={() =>
+                                        navigator.clipboard.writeText(publicUrl)
+                                    }
+                                >
+                                    Copy public URL
+                                </button>
+
+                                <a
+                                    href={publicUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="btn btn-sm btn-outline-primary"
+                                >
+                                    Open form
+                                </a>
+
+                                <button
+                                    type="button"
+                                    className="btn btn-sm btn-outline-danger"
+                                    onClick={handleUnpublish}
+                                >
+                                    Unpublish
+                                </button>
+                            </div>
                         ) : (
                             <button
                                 type="button"
