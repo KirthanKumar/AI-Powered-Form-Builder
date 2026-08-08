@@ -57,4 +57,35 @@ class FormVersionService
             return $nextVersion;
         });
     }
+
+    public function getVersions(Form $form)
+    {
+        $currentVersionId = $form->current_version_id;
+
+        return $form->versions()
+            ->with('createdBy:id,name')
+            ->orderByDesc('version_number')
+            ->get()->map(function (FormVersion $version) use ($currentVersionId) {
+                return [
+                    'id' => $version->id,
+                    'version_number' => $version->version_number,
+                    'created_by' => $version->createdBy,
+                    'created_at' => $version->created_at,
+                    'is_current' => $version->id === $currentVersionId,
+                ];
+            });
+    }
+
+    public function rollback(Form $form, User $user, FormVersion $version): FormVersion
+    {
+        if ($version->form_id !== $form->id) {
+            abort(404);
+        }
+
+        return $this->createNextVersion(
+            $form,
+            $user,
+            $version->schema_json
+        );
+    }
 }

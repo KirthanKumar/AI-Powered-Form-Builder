@@ -26,6 +26,56 @@ export default function FormBuilderPage() {
     const [aiLoading, setAiLoading] = useState(false);
     const [aiError, setAiError] = useState('');
 
+    const [versions, setVersions] = useState([]);
+    const [showVersions, setShowVersions] = useState(false);
+
+    async function loadVersions() {
+        try {
+            const response = await api.get(
+                `/forms/${formId}/versions`
+            );
+
+            setVersions(response.data.data);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    async function handleRollback(versionId) {
+        const confirmed = window.confirm(
+            'Rollback this form to this version?'
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            const response = await api.post(
+                `/forms/${formId}/versions/${versionId}/rollback`
+            );
+
+            const updatedForm = response.data.data.form;
+            const updatedVersion = response.data.data.version;
+
+            setSchema(updatedVersion.schema_json);
+            setVersion(updatedVersion.version_number);
+            setForm(updatedForm);
+
+            setSelectedFieldId(null);
+            setSelectedSectionId(null);
+
+            await loadVersions();
+        } catch (error) {
+            console.error(error);
+
+            setError(
+                error.response?.data?.message ??
+                'Unable to rollback form.'
+            );
+        }
+    }
+
     async function handleAiEdit() {
         if (!aiPrompt.trim()) {
             return;
@@ -461,6 +511,21 @@ export default function FormBuilderPage() {
                     </div>
 
                     <div className="d-flex gap-2">
+                        <button
+                            type="button"
+                            className="btn btn-outline-secondary"
+                            onClick={() => {
+                                const next = !showVersions;
+
+                                setShowVersions(next);
+
+                                if (next) {
+                                    loadVersions();
+                                }
+                            }}
+                        >
+                            Version History
+                        </button>
 
                         <Link
                             to={`/forms/${formId}/preview`}
@@ -520,7 +585,66 @@ export default function FormBuilderPage() {
             </nav>
 
             <div className="container-fluid">
+                {showVersions && (
+                    <div className="bg-white border-bottom">
+                        <div className="container-fluid px-4 py-3">
 
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                <h6 className="mb-0">
+                                    Version History
+                                </h6>
+
+                                <button
+                                    type="button"
+                                    className="btn btn-sm btn-outline-secondary"
+                                    onClick={() => setShowVersions(false)}
+                                >
+                                    Close
+                                </button>
+                            </div>
+
+                            {versions.map((item) => (
+                                <div
+                                    key={item.id}
+                                    className="border rounded p-3 mb-2"
+                                >
+                                    <div className="d-flex justify-content-between align-items-center">
+
+                                        <div>
+                                            <div className="fw-semibold">
+                                                Version {item.version_number}
+                                            </div>
+
+                                            <div className="small text-muted">
+                                                {new Date(
+                                                    item.created_at
+                                                ).toLocaleString()}
+                                            </div>
+                                        </div>
+
+                                        {item.is_current ? (
+                                            <span className="badge text-bg-primary">
+                                                Current
+                                            </span>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                className="btn btn-sm btn-outline-warning"
+                                                onClick={() =>
+                                                    handleRollback(item.id)
+                                                }
+                                            >
+                                                Rollback
+                                            </button>
+                                        )}
+
+                                    </div>
+                                </div>
+                            ))}
+
+                        </div>
+                    </div>
+                )}
                 {loading && (
                     <div className="text-center py-5">
 

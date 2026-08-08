@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PublicFormController;
 use App\Http\Controllers\Api\SubmissionController;
 use App\Http\Controllers\Api\AiFormController;
+use App\Http\Controllers\Api\FormVersionController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -29,6 +30,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/ai/forms/generate', [AiFormController::class, 'generate']);
     Route::post('/forms/{form}/ai/edit', [AiFormController::class, 'edit']);
+
+    Route::get('/forms/{form}/versions',[FormVersionController::class, 'index']);
+    Route::post('/forms/{form}/versions/{version}/rollback',[FormVersionController::class, 'rollback']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {
