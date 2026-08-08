@@ -5,6 +5,7 @@ import api from '../api/client';
 import FormCanvas from '../components/builder/FormCanvas';
 import FieldPalette from '../components/builder/FieldPalette';
 import FieldSettings from '../components/builder/FieldSettings';
+import SectionControls from '../components/builder/SectionControls';
 
 export default function FormBuilderPage() {
 
@@ -18,6 +19,79 @@ export default function FormBuilderPage() {
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    async function handleAddSection(title) {
+        try {
+            const response = await api.post(
+                `/forms/${formId}/sections`,
+                {
+                    title,
+                }
+            );
+
+            setSchema(response.data.data.schema);
+            setVersion(response.data.data.version_number);
+
+            const newSchema = response.data.data.schema;
+
+            const newSection =
+                newSchema.sections[newSchema.sections.length - 1];
+
+            setSelectedSectionId(newSection?.id ?? null);
+
+        } catch (error) {
+            console.error(error);
+
+            setError(
+                error.response?.data?.message ??
+                'Unable to add section.'
+            );
+        }
+    }
+
+    async function handleRenameSection(sectionId, title) {
+        try {
+            const response = await api.patch(
+                `/forms/${formId}/sections/${sectionId}`,
+                {
+                    title,
+                }
+            );
+
+            setSchema(response.data.data.schema);
+            setVersion(response.data.data.version_number);
+
+        } catch (error) {
+            console.error(error);
+
+            setError(
+                error.response?.data?.message ??
+                'Unable to rename section.'
+            );
+        }
+    }
+
+    async function handleDeleteSection(sectionId) {
+        try {
+            const response = await api.delete(
+                `/forms/${formId}/sections/${sectionId}`
+            );
+
+            setSchema(response.data.data.schema);
+            setVersion(response.data.data.version_number);
+
+            setSelectedSectionId(null);
+            setSelectedFieldId(null);
+
+        } catch (error) {
+            console.error(error);
+
+            setError(
+                error.response?.data?.message ??
+                'Unable to delete section.'
+            );
+        }
+    }
 
     async function handleDeleteField(fieldId) {
         if (!fieldId) {
@@ -92,6 +166,16 @@ export default function FormBuilderPage() {
         }
 
         return null;
+    }
+
+    function findSection(sectionId) {
+        if (!schema || !sectionId) {
+            return null;
+        }
+
+        return schema.sections.find(
+            (section) => section.id === sectionId
+        ) ?? null;
     }
 
     function getDefaultLabel(type) {
@@ -180,6 +264,7 @@ export default function FormBuilderPage() {
         setSelectedFieldId(fieldId);
     }
     const selectedField = findField(selectedFieldId);
+    const selectedSection = findSection(selectedSectionId);
 
     return (
         <div className="min-vh-100 bg-light">
@@ -291,6 +376,14 @@ export default function FormBuilderPage() {
                         >
 
                             <div className="p-4">
+                                <SectionControls
+                                    selectedSection={selectedSection}
+                                    onAdd={handleAddSection}
+                                    onRename={handleRenameSection}
+                                    onDelete={handleDeleteSection}
+                                    disabled={loading}
+                                />
+
 
                                 <FormCanvas
                                     schema={schema}
