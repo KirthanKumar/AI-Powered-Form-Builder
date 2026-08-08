@@ -20,6 +20,52 @@ export default function FormBuilderPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
+    async function handleDuplicateField(fieldId) {
+        if (!fieldId) {
+            return;
+        }
+
+        try {
+            const response = await api.post(
+                `/forms/${formId}/fields/${fieldId}/duplicate`
+            );
+
+            setSchema(response.data.data.schema);
+            setVersion(response.data.data.version_number);
+
+        } catch (error) {
+            console.error(error);
+
+            setError(
+                error.response?.data?.message ??
+                'Unable to duplicate field.'
+            );
+        }
+    }
+
+    async function handleMoveField(sectionId, from, to) {
+        try {
+            const response = await api.patch(
+                `/forms/${formId}/sections/${sectionId}/fields/move`,
+                {
+                    from,
+                    to,
+                }
+            );
+
+            setSchema(response.data.data.schema);
+            setVersion(response.data.data.version_number);
+
+        } catch (error) {
+            console.error(error);
+
+            setError(
+                error.response?.data?.message ??
+                'Unable to move field.'
+            );
+        }
+    }
+
     async function handleAddSection(title) {
         try {
             const response = await api.post(
@@ -391,6 +437,8 @@ export default function FormBuilderPage() {
                                     selectedSectionId={selectedSectionId}
                                     onSelectField={handleSelectField}
                                     onSelectSection={setSelectedSectionId}
+                                    onDuplicateField={handleDuplicateField}
+                                    onMoveField={handleMoveField}
                                 />
 
                             </div>
