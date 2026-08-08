@@ -17,10 +17,23 @@ class SubmissionController extends Controller
             403
         );
 
+        $search = trim($request->string('search')->toString());
+
         $submissions = $form
             ->submissions()
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query
+                        ->where('submitted_email', 'like', "%{$search}%")
+                        ->orWhereRaw(
+                            'CAST(submission_json AS CHAR) LIKE ?',
+                            ["%{$search}%"]
+                        );
+                });
+            })
             ->latest()
-            ->paginate(20);
+            ->paginate(10)
+            ->withQueryString();
 
         return SubmissionResource::collection($submissions);
     }

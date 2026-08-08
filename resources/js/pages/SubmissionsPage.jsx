@@ -8,19 +8,31 @@ export default function SubmissionsPage() {
     const navigate = useNavigate();
 
     const [submissions, setSubmissions] = useState([]);
+    const [pagination, setPagination] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [search, setSearch] = useState('');
 
-    async function loadSubmissions() {
+    async function loadSubmissions(page = 1, searchTerm = search) {
         setLoading(true);
         setError('');
 
         try {
+            const params = new URLSearchParams({
+                page: page.toString(),
+            });
+
+            if (searchTerm.trim()) {
+                params.set('search', searchTerm.trim());
+            }
+
             const response = await api.get(
-                `/forms/${formId}/submissions`
+                `/forms/${formId}/submissions?${params.toString()}`
             );
 
             setSubmissions(response.data.data);
+            setPagination(response.data.meta);
+
         } catch (error) {
             console.error(error);
 
@@ -94,14 +106,62 @@ export default function SubmissionsPage() {
                     <div className="card shadow-sm">
 
                         <div className="card-header bg-white">
-                            <div className="fw-semibold">
-                                Responses
+
+                            <div className="d-flex justify-content-between align-items-center gap-3">
+
+                                <div>
+                                    <div className="fw-semibold">
+                                        Responses
+                                    </div>
+
+                                    <div className="small text-muted">
+                                        {pagination?.total ?? submissions.length} submission
+                                        {(pagination?.total ?? submissions.length) !== 1
+                                            ? 's'
+                                            : ''}
+                                    </div>
+                                </div>
+
+                                <form
+                                    className="d-flex gap-2"
+                                    onSubmit={(event) => {
+                                        event.preventDefault();
+                                        loadSubmissions(1, search);
+                                    }}
+                                >
+                                    <input
+                                        type="search"
+                                        className="form-control"
+                                        placeholder="Search submissions..."
+                                        value={search}
+                                        onChange={(event) =>
+                                            setSearch(event.target.value)
+                                        }
+                                    />
+
+                                    <button
+                                        type="submit"
+                                        className="btn btn-outline-primary"
+                                    >
+                                        Search
+                                    </button>
+
+                                    {search && (
+                                        <button
+                                            type="button"
+                                            className="btn btn-outline-secondary"
+                                            onClick={() => {
+                                                setSearch('');
+                                                loadSubmissions(1, '');
+                                            }}
+                                        >
+                                            Clear
+                                        </button>
+                                    )}
+                                </form>
+
                             </div>
 
-                            <div className="small text-muted">
-                                {submissions.length} submission
-                                {submissions.length !== 1 ? 's' : ''}
-                            </div>
                         </div>
 
                         {submissions.length === 0 ? (
@@ -157,7 +217,7 @@ export default function SubmissionsPage() {
                                                 >
 
                                                     <td>
-                                                        {index + 1}
+                                                        {(pagination.current_page - 1) * pagination.per_page + index + 1}
                                                     </td>
 
                                                     <td>
@@ -198,6 +258,41 @@ export default function SubmissionsPage() {
                                     </tbody>
 
                                 </table>
+
+                            </div>
+                        )}
+
+                        {pagination && pagination.last_page > 1 && (
+                            <div className="card-footer bg-white d-flex justify-content-between align-items-center">
+
+                                <button
+                                    type="button"
+                                    className="btn btn-sm btn-outline-secondary"
+                                    disabled={pagination.current_page <= 1 || loading}
+                                    onClick={() =>
+                                        loadSubmissions(pagination.current_page - 1)
+                                    }
+                                >
+                                    Previous
+                                </button>
+
+                                <span className="small text-muted">
+                                    Page {pagination.current_page} of {pagination.last_page}
+                                </span>
+
+                                <button
+                                    type="button"
+                                    className="btn btn-sm btn-outline-secondary"
+                                    disabled={
+                                        pagination.current_page >= pagination.last_page ||
+                                        loading
+                                    }
+                                    onClick={() =>
+                                        loadSubmissions(pagination.current_page + 1)
+                                    }
+                                >
+                                    Next
+                                </button>
 
                             </div>
                         )}
