@@ -13,12 +13,75 @@ export default function FormBuilderPage() {
 
     const [schema, setSchema] = useState(null);
     const [version, setVersion] = useState(null);
+    const [form, setForm] = useState(null);
 
     const [selectedFieldId, setSelectedFieldId] = useState(null);
     const [selectedSectionId, setSelectedSectionId] = useState(null);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    async function handlePublish() {
+        try {
+            const response = await api.post(
+                `/forms/${formId}/publish`
+            );
+
+            setForm(response.data.data);
+            setVersion(
+                response.data.data.current_version?.version_number
+            );
+
+        } catch (error) {
+            console.error(error);
+
+            setError(
+                error.response?.data?.message ??
+                'Unable to publish form.'
+            );
+        }
+    }
+
+    async function handleUnpublish() {
+        try {
+            const response = await api.post(
+                `/forms/${formId}/unpublish`
+            );
+
+            setForm(response.data.data);
+            setVersion(
+                response.data.data.current_version?.version_number
+            );
+
+        } catch (error) {
+            console.error(error);
+
+            setError(
+                error.response?.data?.message ??
+                'Unable to unpublish form.'
+            );
+        }
+    }
+
+    async function loadForm() {
+        try {
+            const response = await api.get(`/forms/${formId}`);
+
+            setForm(response.data.data);
+        } catch (error) {
+            console.error(error);
+
+            if (error.response?.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+
+            setError(
+                error.response?.data?.message ??
+                'Unable to load form.'
+            );
+        }
+    }
 
     async function handleDuplicateField(fieldId) {
         if (!fieldId) {
@@ -303,6 +366,7 @@ export default function FormBuilderPage() {
     }
 
     useEffect(() => {
+        loadForm();
         loadSchema();
     }, [formId]);
 
@@ -351,12 +415,25 @@ export default function FormBuilderPage() {
                             Preview
                         </Link>
 
-                        <button
-                            className="btn btn-primary"
-                            disabled
-                        >
-                            Save
-                        </button>
+                        {form?.status === 'published' ? (
+                            <button
+                                type="button"
+                                className="btn btn-outline-danger"
+                                disabled={loading}
+                                onClick={handleUnpublish}
+                            >
+                                Unpublish
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                className="btn btn-primary"
+                                disabled={loading}
+                                onClick={handlePublish}
+                            >
+                                Publish
+                            </button>
+                        )}
 
                     </div>
 

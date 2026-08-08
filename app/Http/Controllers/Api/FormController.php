@@ -7,6 +7,8 @@ use App\Http\Requests\StoreFormRequest;
 use App\Http\Resources\FormResource;
 use App\Services\FormService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use App\Models\Form;
 
 class FormController extends Controller
 {
@@ -30,5 +32,30 @@ class FormController extends Controller
         );
 
         return new FormResource($form);
+    }
+
+    public function publish(Request $request, Form $form): FormResource
+    {
+        Gate::authorize('update', $form);
+        $form = $this->formService->publish($form);
+
+        return new FormResource($form);
+    }
+
+    public function unpublish(Request $request, Form $form): FormResource
+    {
+        Gate::authorize('update', $form);
+        $form = $this->formService->unpublish($form);
+
+        return new FormResource($form);
+    }
+
+    public function show(Request $request, Form $form): FormResource
+    {
+        Gate::authorize('view', $form);
+
+        return new FormResource(
+            $form->load('currentVersion')
+        );
     }
 }
