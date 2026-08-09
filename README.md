@@ -23,9 +23,9 @@ Word and Excel import was not implemented within the available development time.
 
 ## Live Demo
 
-**Application:** `TODO — add deployed URL`
+**Application:** `https://ai-powered-form-builder-production-b86d.up.railway.app/`
 
-**Demo credentials:** `TODO — add demo email/password`
+**Demo credentials:** `edu@net.com, eduneted`
 
 ---
 

@@ -30,7 +30,7 @@ class FieldFactory
         return [
             'id' => (string) Str::uuid(),
             'type' => $type,
-            'key' => Str::snake($label),
+            'key' => Str::snake($label) . '_' . Str::lower(Str::random(6)),
             'label' => $label,
             'placeholder' => '',
             'help_text' => '',
